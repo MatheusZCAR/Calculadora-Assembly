@@ -21,6 +21,10 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
         MOV ax,@DATA            ;inicializa o data
         MOV ds,ax
     NOVAMENTE:                  ;repeticao caso o usuario tenha pressionado (s) e queira fazer outra operacao
+        MOV ax,03               ;apaga o conteúdo da tela (estetico, usando a funcao INT 10h)
+        INT 10h                 
+        XOR ax,ax
+        
         MOV ah,09h              ;funcao imprimir string
         LEA dx,msg5             ;msg5 string calculadora e escolha de operacao
         INT 21h 
