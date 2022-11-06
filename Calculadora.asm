@@ -5,12 +5,13 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
     msg2 DB 10,'Segundo Numero: ','$'      
     msg3 DB 10,'Quociente: ','$'
     msg4 DB 'Resto: ','$'   
-    msg5 DB 10,'==============================================================',10,'+ - Calculadora x /',10,'Sao aceitos somente numeros de um digito (entre 0 e 9)',10,'Escolha a operacao pressionando o numero em parenteses:','$'
+    msg5 DB 10,'==============================================================',10,'+ - Calculadora x /',10,10,'Sao aceitos somente numeros de um digito (entre 0 e 9)','$'
     msg6 DB 10,'==============================================================',10,'-> Adicao (1)',10,'-> Subtracao (2)',10,'-> Multiplicacao (3)',10,'-> Divisao (4)',10,'-> Encerrar Programa (5)',10,'==============================================================',10,'Opcao: ','$'
-    msg7 DB 10,10,'==============================================================',10,'Deseja realizar outra operacao?',10,'Aperte (s) para continuar ou qualquer tecla para finalizar',10,'==============================================================',10,'Opcao: ','$'
+    msg7 DB 10,10,'==============================================================',10,'Deseja realizar outra operacao?',10,'-> Digite (s) para continuar',10,'-> Pressione qualquer tecla para finalizar',10,'==============================================================',10,'Opcao: ','$'
     msg8 DB 10,'Resultado: ','$'
     msg9 DB 10,'Programa Encerrado','$'
-    msg10 DB 10,10,'Obs: Nao eh possivel dividir numeros por zero.',10,'Escolha o dividendo e o divisor, nesta ordem.',10,'$'
+    msg10 DB 10,10,'Obs: Nao eh possivel dividir numeros por zero.',10,10,'Escolha o dividendo e o divisor, nesta ordem.',10,'$'
+    msg11 DB 10,10,'Nao utilize o ENTER do teclado, o programa realiza',10,'as operacoes automaticamente',10,10,'Nao utilize o BACKSPACE (Apagar) do teclado',10,'o programa ignora a digitacao incorreta.',10,10,'Escolha a operacao digitando um dos numeros em parenteses:','$'
     var1 DB ?                    ;variavel que armazena o primeiro numero digitado pelo usuario
     var2 DB ?                    ;variavel que armazena o segundo numero digitado pelo usuario
     aux1 DB ?                    ;variavel auxiliar para evitar conflitos no programa entre os registradores
@@ -20,15 +21,19 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
     main proc
         MOV ax,@DATA            ;inicializa o data
         MOV ds,ax
+
     NOVAMENTE:                  ;repeticao caso o usuario tenha pressionado (s) e queira fazer outra operacao
-        MOV ax,03               ;apaga o conteúdo da tela (estetico, usando a funcao INT 10h)
+        MOV ax,03               ;apaga o conteúdo da tela
         INT 10h                 
         XOR ax,ax
-        
+
         MOV ah,09h              ;funcao imprimir string
         LEA dx,msg5             ;msg5 string calculadora e escolha de operacao
-        INT 21h 
-        MOV ah,09h              
+        INT 21h
+
+        LEA dx,msg11
+        INT 21h
+       
         LEA dx,msg6             ;msg6 string operandos de 1 a 5
         INT 21h
         
