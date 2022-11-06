@@ -175,22 +175,22 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
 
         CALL input
 
-        CALL quebra_linha
-        CALL msg_resultado
+        CALL quebra_linha           ;procedimento estetico
+        CALL msg_resultado          ;procedimento estetico
 
-        XOR bx,bx
+        XOR bx,bx          ;limpa bx por precaução
 
-        MOV bh,var1        ;bh=Mcand
-        MOV bl,var2        ;bl=Prod
+        MOV bh,var1        ;Multiplicando
+        MOV bl,var2        ;Multiplicador/Produto
 
-        SHL bh,4           ;joga o numero para os 4 primeiros bits
+        SHL bh,4           ;joga o numero para os 4 primeiros bits do registrador
 
     MULT:
-        TEST bl,01h        ;1=soma,0=ignora
+        TEST bl,01h        ;testa o ultimo bit do multiplicador, se for igual a 1 o multiplicando deve ser somado ao produto, caso contrário nada acontece
         JZ ZERO
-        ADD bl,bh
+        ADD bl,bh          ;soma do multiplicando ao produto
     ZERO:
-        SHR bl,1           ;próximo bit
+        SHR bl,1           ;prepara o multiplicador para o próximo test e o produto para a próxima soma/resultado
         DEC cl
         JNZ MULT
 
