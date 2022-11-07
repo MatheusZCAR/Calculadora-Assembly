@@ -5,11 +5,13 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
     msg2 DB 10,'Segundo Numero: ','$'      
     msg3 DB 10,'Quociente: ','$'
     msg4 DB 'Resto: ','$'   
-    msg5 DB 10,'Calculadora',10,'Escolha a operacao pressionando o numero em parenteses:','$'
+    msg5 DB 10,'==============================================================',10,'+ - Calculadora x /',10,10,'Sao aceitos somente numeros de um digito (entre 0 e 9)','$'
     msg6 DB 10,'==============================================================',10,'-> Adicao (1)',10,'-> Subtracao (2)',10,'-> Multiplicacao (3)',10,'-> Divisao (4)',10,'-> Encerrar Programa (5)',10,'==============================================================',10,'Opcao: ','$'
-    msg7 DB 10,10,'==============================================================',10,'Deseja realizar outra operacao?',10,'Aperte (s) para continuar ou qualquer tecla para finalizar',10,'==============================================================',10,'Opcao: ','$'
+    msg7 DB 10,10,'==============================================================',10,'Deseja realizar outra operacao?',10,'-> Digite (s) para continuar',10,'-> Pressione qualquer tecla para finalizar',10,'==============================================================',10,'Opcao: ','$'
     msg8 DB 10,'Resultado: ','$'
     msg9 DB 10,'Programa Encerrado','$'
+    msg10 DB 10,10,'Obs: Nao eh possivel dividir numeros por zero.',10,10,'Escolha o dividendo e o divisor, nesta ordem.',10,'$'
+    msg11 DB 10,10,'Nao utilize o ENTER do teclado, o programa realiza',10,'as operacoes automaticamente',10,10,'Nao utilize o BACKSPACE (Apagar) do teclado',10,'o programa ignora a digitacao incorreta.',10,10,'Escolha a operacao digitando um dos numeros em parenteses:','$'
     var1 DB ?                    ;variavel que armazena o primeiro numero digitado pelo usuario
     var2 DB ?                    ;variavel que armazena o segundo numero digitado pelo usuario
     aux1 DB ?                    ;variavel auxiliar para evitar conflitos no programa entre os registradores
@@ -19,13 +21,19 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
     main proc
         MOV ax,@DATA            ;inicializa o data
         MOV ds,ax
-        
-        MOV ah,09h              ;funcao imprimir string
-        LEA dx,msg5             ;msg5 string calculadora e escolha de operacao
-        INT 21h 
 
     NOVAMENTE:                  ;repeticao caso o usuario tenha pressionado (s) e queira fazer outra operacao
-        MOV ah,09h              
+        MOV ax,03               ;apaga o conteúdo da tela
+        INT 10h                 
+        XOR ax,ax
+
+        MOV ah,09h              ;funcao imprimir string
+        LEA dx,msg5             ;msg5 string calculadora e escolha de operacao
+        INT 21h
+
+        LEA dx,msg11
+        INT 21h
+       
         LEA dx,msg6             ;msg6 string operandos de 1 a 5
         INT 21h
         
@@ -171,37 +179,37 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
 
     ;procedimento multiplicacao
     multiplicacao proc
-        MOV cl,4           ;contador
+        MOV cl,4                   ;contador
 
         CALL input
 
-        CALL quebra_linha           ;procedimento estetico
-        CALL msg_resultado          ;procedimento estetico
+        CALL quebra_linha          ;procedimento estetico
+        CALL msg_resultado         ;procedimento estetico
 
-        XOR bx,bx          ;limpa bx por precaução
+        XOR bx,bx                  ;limpa bx por precaução
 
-        MOV bh,var1        ;Multiplicando
-        MOV bl,var2        ;Multiplicador/Produto
+        MOV bh,var1                ;Multiplicando
+        MOV bl,var2                ;Multiplicador/Produto
 
-        SHL bh,4           ;joga o numero para os 4 primeiros bits do registrador
+        SHL bh,4                   ;joga o numero para os 4 primeiros bits do registrador
 
     MULT:
-        TEST bl,01h        ;testa o ultimo bit do multiplicador, se for igual a 1 o multiplicando deve ser somado ao produto, caso contrário nada acontece
+        TEST bl,01h                ;testa o ultimo bit do multiplicador, se for igual a 1 o multiplicando deve ser somado ao produto, caso contrário nada acontece
         JZ ZERO
-        ADD bl,bh          ;soma do multiplicando ao produto
+        ADD bl,bh                  ;soma do multiplicando ao produto
     ZERO:
-        SHR bl,1           ;prepara o multiplicador para o próximo test e o produto para a próxima soma/resultado
+        SHR bl,1                   ;prepara o multiplicador para o próximo test e o produto para a próxima soma/resultado
         DEC cl
         JNZ MULT
 
-        XOR ax,ax          ;zera ax só pra ter certeza de que ah vai estar vazio
+        XOR ax,ax                  ;zera ax só pra ter certeza de que ah vai estar vazio
         MOV al,bl
         MOV bh,10       
-        DIV bh             ;binario para decimal
-        MOV bl,ah          ;unidade
+        DIV bh                     ;binario para decimal
+        MOV bl,ah                  ;unidade
 
         MOV ah,2h
-        MOV dl,al          ;dezena
+        MOV dl,al                  ;dezena
         ADD dl,30h
         INT 21h
         mov dl,bl
@@ -212,7 +220,20 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
     
     ;procedimento divisao
     divisao proc
+    TENTE_NOVAMENTE:
+        LEA dx,msg10
+        MOV ah,09h
+        INT 21h
+        XOR ax,ax
+        XOR dx,dx
+
         CALL input
+
+        ADD var2,30h                ;transforma var2 (segundo numero escolhido pelo usuario, que eh o divisor) 
+        CMP var2,48                 ;em caractere para comparar com 48 (zero na tabela ascii)
+        JE TENTE_NOVAMENTE          ;se for igual a zero, o usuario tera que escolher outro numero, pois eh impossivel dividir por zero
+
+        SUB var2,30h
 
         MOV bl,var1        ;dividendo/resto
         MOV bh,var2        ;divisor
@@ -220,18 +241,18 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
 
         CALL quebra_linha
 
-        CMP bh,bl          
-        JG MAIOR           ;caso o divisor seja maior que o dividendo os dados serão analisados
+        CMP bh,bl
+        JG MAIOR
     N9:
         SHL bh,4
         SHL bl,1
     DIVI:
-        SUB bl,bh          ;compara se o dividendo é maior que o divisor
+        SUB bl,bh
         CMP bl,0
-        JGE D1             ;se o dividendo é maior que o divisor move o quociente 1 a esquerda e adiciona 1
+        JGE D1
         ADD bl,bh
         SHL bl,1
-        JMP D0             ;se o dividendo é menor desfaz a subtração e apenas move o quociente 1 a esquerda
+        JMP D0
     D1:
         SHL bl,1
         ADD bl,1
@@ -240,7 +261,7 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
         JNZ DIVI
 
         MOV al,bl
-        AND al,0F0H        ;bl contem o quociente nos 4 bits da direita e o resto nos 4 bits da esquerda, al recebe o resto e bl mantem apenas o quociente
+        AND al,0F0H
         SHR al,5
         AND bl,0FH
     PRINT:
@@ -264,10 +285,10 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
         INT 21h
         RET
 
-    MAIOR:                  ;caso o divisor seja 9 e o dividendo não seja 9 o programa não da o resultado correto por conta de overflow
+    MAIOR:
         CMP bh,9
         JNZ N9
-        MOV al,0            ;X menor que 9 dividido por 9 resulta em quociente 0 e resto X
+        MOV al,0
         XCHG al,bl
         JMP PRINT
     divisao ENDP
