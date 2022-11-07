@@ -235,24 +235,24 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
 
         SUB var2,30h
 
-        MOV bl,var1        ;dividendo/resto
-        MOV bh,var2        ;divisor
-        MOV ch,4           ;loop
+        MOV bl,var1                 ;dividendo/resto
+        MOV bh,var2                 ;divisor
+        MOV ch,4                    ;loop
 
         CALL quebra_linha
 
-        CMP bh,bl
-        JG MAIOR
+        CMP bh,bl                   
+        JG MAIOR                    ;caso o divisor seja maior que o dividendo os dados serão analisados
     N9:
         SHL bh,4
         SHL bl,1
     DIVI:
-        SUB bl,bh
+        SUB bl,bh                   ;compara se o dividendo é maior que o divisor
         CMP bl,0
-        JGE D1
+        JGE D1                      ;se o dividendo é maior que o divisor move o quociente 1 a esquerda e adiciona 1
         ADD bl,bh
         SHL bl,1
-        JMP D0
+        JMP D0                      ;se o dividendo é menor desfaz a subtração e apenas move o quociente 1 a esquerda
     D1:
         SHL bl,1
         ADD bl,1
@@ -261,7 +261,7 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
         JNZ DIVI
 
         MOV al,bl
-        AND al,0F0H
+        AND al,0F0H                 ;bl contem o quociente nos 4 bits da direita e o resto nos 4 bits da esquerda, al recebe o resto e bl mantem apenas o quociente
         SHR al,5
         AND bl,0FH
     PRINT:
@@ -270,11 +270,11 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
 
         CALL msg_quociente
 
-        MOV AH,2            ;coloca 02h
+        MOV AH,2                    ;coloca 02h
         MOV dl,aux1
         MOV bl,aux2
-        ADD dl,30h          ;inicio transforma em caractere
-        INT 21h             ;executa
+        ADD dl,30h                  ;inicio transforma em caractere
+        INT 21h                     ;executa
 
         CALL quebra_linha
         CALL msg_resto
@@ -285,10 +285,10 @@ TITLE NOME: JEAN OKABE REZENDE PITON | RA: 22013310 ||| NOME: MATHEUS ZANON CARI
         INT 21h
         RET
 
-    MAIOR:
+    MAIOR:                          ;caso o divisor seja 9 e o dividendo não seja 9 o programa não da o resultado correto por conta de overflow
         CMP bh,9
         JNZ N9
-        MOV al,0
+        MOV al,0                    ;X menor que 9 dividido por 9 resulta em quociente 0 e resto X
         XCHG al,bl
         JMP PRINT
     divisao ENDP
